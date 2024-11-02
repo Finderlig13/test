@@ -1,0 +1,114 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Scanner scanner = new Scanner(System.in);
+
+        while(true) {
+            String input = scanner.nextLine().trim();
+
+            if(input.isEmpty()) {
+                break;
+            }
+
+            String result = result(input);
+        }
+        scanner.close();
+    }
+
+    private static String result(String input) throws Exception {
+        input = input.trim();
+
+        if (!input.startsWith("\"") || (!input.contains("+") && !input.contains("-")
+                && !input.contains("*") && !input.contains("/"))) {
+            throw new Exception("Некорректное выражение. Ожидается формат \"строка\" + \"строка\", \"строка\" - \"строка\", \"строка\" * число, \"строка\" / число.");
+        }
+
+        char operator = ' ';
+        int operatorIndex = -1;
+
+        if (input.contains(" + ")) {
+            operator = '+';
+            operatorIndex = input.indexOf(" + ");
+        } else if (input.contains(" - ")) {
+            operator = '-';
+            operatorIndex = input.indexOf(" - ");
+        } else if (input.contains(" * ")) {
+            operator = '*';
+            operatorIndex = input.indexOf(" * ");
+        } else if (input.contains(" / ")) {
+            operator = '/';
+            operatorIndex = input.indexOf(" / ");
+        } else {
+            throw new Exception("Некорректная операция.");
+        }
+
+        String leftOperand = input.substring(0, operatorIndex).trim();
+        if (!leftOperand.startsWith("\"") || !leftOperand.endsWith("\"")) {
+            throw new Exception("Левый операнд должен быть строкой в кавычках.");
+        }
+        leftOperand = leftOperand.substring(1, leftOperand.length() - 1);
+
+        if (leftOperand.length() > 10) {
+            throw new Exception("Длина строки не должна превышать 10 символов.");
+        }
+
+        String rightOperand = input.substring(operatorIndex + 3).trim();
+        String resultEnd;
+
+        switch (operator) {
+            case '+':
+                if (!rightOperand.startsWith("\"") || !rightOperand.endsWith("\"")) {
+                    throw new Exception("Операция сложения возможна только между строками.");
+                }
+                rightOperand = rightOperand.substring(1, rightOperand.length() - 1);
+                resultEnd = leftOperand + rightOperand;
+                break;
+
+            case '-':
+                if (!rightOperand.startsWith("\"") || !rightOperand.endsWith("\"")) {
+                    throw new Exception("Операция вычитания возможна только между строками.");
+                }
+                rightOperand = rightOperand.substring(1, rightOperand.length() - 1);
+                resultEnd = leftOperand.contains(rightOperand) ? leftOperand.replace(rightOperand, "") : leftOperand;
+                break;
+
+            case '*':
+                int multiplier;
+                try {
+                    multiplier = Integer.parseInt(rightOperand);
+                } catch (NumberFormatException e) {
+                    throw new Exception("Правый операнд для умножения должен быть числом.");
+                }
+                if (multiplier < 1 || multiplier > 10) {
+                    throw new Exception("Множитель должен быть от 1 до 10.");
+                }
+                resultEnd = leftOperand.repeat(multiplier);
+                break;
+
+            case '/':
+                int divisor;
+                try {
+                    divisor = Integer.parseInt(rightOperand);
+                } catch (NumberFormatException e) {
+                    throw new Exception("Правый операнд для деления должен быть числом.");
+                }
+                if (divisor < 1 || divisor > 10) {
+                    throw new Exception("Делитель должен быть от 1 до 10.");
+                }
+                int newLength = leftOperand.length() / divisor;
+                resultEnd = leftOperand.substring(0, newLength);
+                break;
+
+            default:
+                throw new Exception("Неподдерживаемая операция.");
+        }
+
+        if (resultEnd.length() > 40) {
+            resultEnd = resultEnd.substring(0, 40) + "...";
+        }
+
+        System.out.println("\"" + resultEnd + "\"");
+        return "\"" + resultEnd + "\"";
+    }
+}
